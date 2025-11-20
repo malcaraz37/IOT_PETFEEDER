@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Language" content="es" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PetFeeder Dashboard</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    .transition-all { transition: all 0.6s ease; }
+
+    .night-mode {
+      background-color: #0a192f !important;
+      color: #f0f4ff !important;
+    }
+
+    .night-card {
+      background: rgba(20, 30, 50, 0.9) !important;
+      border: 1px solid #334155;
+      box-shadow: 0 0 20px rgba(96, 165, 250, 0.4);
+      color: #e0ecff !important;
+    }
+
+    .fade-in {
+      animation: fadeIn 1s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    input[type="time"]::-webkit-datetime-edit-ampm-field { display: none; }
+  </style>
+</head>
+
+<body class="bg-white min-h-screen p-6 transition-all">
+
+  <!-- 🔹 Encabezado -->
+  <div class="flex items-center justify-between mb-8 relative">
+    <div class="flex items-center gap-3">
+      <img src="img/peetfeederrr.png" alt="PetFeeder Logo" class="w-30 h-20">
+      <h1 class="text-4xl font-extrabold text-blue-800 drop-shadow-sm">PetFeeder</h1>
+    </div>
+
+    <!-- 🔸 Icono de usuario -->
+    <div class="relative">
+      <button id="userMenuBtn" class="flex items-center gap-2 bg-white border border-gray-300 px-3 py-2 rounded-full shadow hover:bg-gray-100 transition">
+        <i class="fa-solid fa-user text-blue-700 text-xl"></i>
+      </button>
+
+      <!-- 🔽 Dropdown -->
+      <div id="userDropdown" class="hidden absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-xl shadow-lg p-4 z-50">
+        <p id="userName" class="text-gray-800 font-bold">Usuario</p>
+        <p id="userEmail" class="text-gray-600 text-sm">correo@example.com</p>
+        <p id="userRole" class="text-gray-500 text-sm mb-3">Rol: user</p>
+        <button id="logoutBtn" class="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg transition">
+          Cerrar sesión
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenido principal -->
+  <div class="grid md:grid-cols-2 gap-6 max-w-6xl mx-auto fade-in">
+    
+    <!-- Estado -->
+    <section id="estadoCard" class="bg-white p-6 rounded-2xl shadow-lg transition-all">
+      <h2 class="text-2xl font-semibold mb-4 text-blue-700 flex items-center gap-2">📊 Estado del Dispositivo</h2>
+<div class="text-blue-900 p-1 bg-blue-50 contador-card rounded-xl shadow-md min-h-[20px]">
+
+      <p id="hora" class="text-base mb-1">--:--:--</p> 
+      <p id="fecha" class="text-base mb-4">--/--/----</p>
+      <h3>Cantidad de dispensaciones hoy:
+<span id="contadorDispensaciones" style="font-size: 17px; font-weight: bold;">0</span></h3>
+</div> 
+<br/>
+      <div class="grid grid-cols-2 gap-4">
+        <!-- Estado del plato -->
+        <div class="bg-blue-50 p-4 rounded-xl flex flex-col items-center shadow-md min-h-[220px] justify-between">
+          <div class="w-50 h-20 flex items-center justify-center">
+            <img id="platoImg" src="img/lleno.png" alt="Estado del plato" class="max-w-full max-h-full object-contain transition-all duration-300">
+          </div>
+          <p class="font-semibold text-blue-900 text-center">Estado del plato</p>
+          <span id="estadoPlato" class="text-lg font-bold text-blue-800">---</span>
+        </div>
+
+        <!-- Luz ambiental -->
+        <div class="bg-blue-50 p-4 rounded-xl flex flex-col items-center shadow-md min-h-[220px] justify-between">
+          <div class="w-50 h-20 flex items-center justify-center">
+            <img src="img/Gemini_Generated_Image_v6jybtv6jybtv6jy (1) (1).png" alt="Luz ambiental" class="max-w-full max-h-full object-contain">
+          </div>
+          <p class="font-semibold text-blue-900 text-center">Luz ambiental</p>
+          <span id="luz" class="text-lg font-bold text-blue-800">---</span>
+        </div>
+
+        <!-- Modo noche -->
+        <div class="bg-blue-50 p-4 rounded-xl flex flex-col items-center shadow-md min-h-[220px] justify-between">
+          <div class="w-40 h-20 flex items-center justify-center">
+            <img id="modoImg" src="img/modonochefalse.png" alt="Modo noche" class="max-w-full max-h-full object-contain">
+          </div>
+          <p class="font-semibold text-blue-900 text-center">Modo noche</p>
+          <span id="modoNoche" class="text-lg font-bold text-blue-800">---</span>
+        </div>
+
+        <!-- Próxima comida -->
+        <div class="bg-blue-50 p-4 rounded-xl flex flex-col items-center shadow-md min-h-[220px] justify-between">
+          <div class="w-50 h-20 flex items-center justify-center">
+            <img src="img/proximacomida1.png" alt="Próxima comida" class="max-w-full max-h-full object-contain">
+          </div>
+          <p class="font-semibold text-blue-900 text-center">Próxima comida</p>
+          <span id="proximaHora" class="text-lg font-bold text-blue-800">---</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Controles -->
+    <section id="controlesCard" class="bg-white p-6 rounded-2xl shadow-lg transition-all">
+ <h2 class="text-2xl font-semibold mb-4 text-blue-700 flex items-center gap-2">⚙️ Controles</h2>
+
+
+      <div class="flex gap-4 mb-6">
+        <button id="feedBtn" class="bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-xl w-full font-bold shadow-md">Dispensar</button>
+      </div>
+          
+
+        <div class="bg-blue-50 p-4 rounded-xl flex flex-col shadow-md min-h-[220px] justify-between">
+
+            <h3 class="text-lg font-semibold mb-2 text-blue-800">Programar horarios</h3>
+
+
+      <div class="flex gap-2 mb-4">
+        <input id="nuevaHora" type="time" step="60" class="text-blue-900 border border-blue-300 rounded-lg p-2 w-full focus:ring focus:ring-blue-400" inputmode="numeric" />
+        <button id="addHorarioBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg font-semibold">➕</button>
+      </div>
+      <ul id="horariosList" class="mb-4 space-y-2 text-blue-900"></ul>
+      <button id="guardarHorariosBtn" class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-3 rounded-xl w-full font-bold shadow-md">Guardar horarios</button>
+<br/>
+      <button id="skipBtn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-3 rounded-xl w-full font-bold shadow-md">Saltar próxima comida</button>
+    </section>
+  </div>
+
+  <script>
+// --- Lógica del menú de usuario ---
+const userMenuBtn = document.getElementById("userMenuBtn");
+const userDropdown = document.getElementById("userDropdown");
+
+userMenuBtn.addEventListener("click", () => {
+  userDropdown.classList.toggle("hidden");
+});
+
+const user = JSON.parse(localStorage.getItem("user"));
+
+if (user) {
+  document.getElementById("userName").textContent = user.name;
+  document.getElementById("userEmail").textContent = user.email;
+  document.getElementById("userRole").textContent = "Rol: " + user.role;
+} else {
+  // Si no hay sesión, redirige al login
+  window.location.href = "login.html";
+}
+
+document.getElementById("logoutBtn").addEventListener("click", () => {
+  localStorage.removeItem("user");
+  window.location.href = "login.html";
+});
+  </script>
+
+  <script src="js/dashboard.js"></script>
+</body>
+</html>
