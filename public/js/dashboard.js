@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const socket = io("http://localhost:3000");
+const socket = io("https://iot-petfeeder.onrender.com");
 
   // 🎛️ Elementos UI
   const feedBtn = document.getElementById("feedBtn");

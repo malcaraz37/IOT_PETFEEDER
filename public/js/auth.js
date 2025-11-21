@@ -3,7 +3,7 @@ document.getElementById("btnLogin").addEventListener("click", async () => {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
   const msg = document.getElementById("msg");
-  const API_URL = "http://localhost:3000";
+const API_URL = "https://iot-petfeeder.onrender.com";
 
   if (!email || !password) {
     msg.textContent = "Por favor ingresa correo y contraseña";
@@ -12,7 +12,7 @@ document.getElementById("btnLogin").addEventListener("click", async () => {
   }
 
   try {
-    const res = await fetch(`${API_URL}/api/auth/login`, {
+const res = await fetch(`https://iot-petfeeder.onrender.com/api/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
