@@ -20,6 +20,7 @@ const io = new SocketIOServer(server, {
   cors: { origin: process.env.CORS_ORIGIN || "*" },
 });
 
+app.use(express.static("public"));
 app.use(cors());
 app.use(express.json());
 app.use("/api/users", userRoutes);
@@ -27,6 +28,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/devices", deviceRoutes);
 app.use("/api/readings", readingRoutes);
 app.use("/api/events", eventRoutes);
+
 
 // 📦 Conexión a MongoDB
 mongoose
